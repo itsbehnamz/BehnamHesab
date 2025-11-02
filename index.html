@@ -49,7 +49,7 @@ span.rent{color:#00FF7F;}  /* سبز */
 function updateTime(){
  let d=new Date(), j=jalaali.toJalaali(d.getFullYear(),d.getMonth()+1,d.getDate());
  let h=d.getHours(), m=d.getMinutes();
- document.getElementById('shamsiTime').innerText=`تاریخ شمسی: ${j.jy}/${j.jm}/${j.jd} - ساعت ${h}:${m.toString().padStart(2,'0')}`;
+ document.getElementById('shamsiTime').innerText=`سلام👋: ${j.jy}/${j.jm}/${j.jd} - ساعت ${h}:${m.toString().padStart(2,'0')}`;
 }
 setInterval(updateTime,1000);
 updateTime();
