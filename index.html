@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>محاسبات مالی علمی با جدول</title>
+<style>
+body{background:#0a0a0a;color:#fff;font-family:sans-serif;text-align:center;padding:20px;}
+h2{color:#FF9800;margin-top:25px;}
+input,button{width:100%;padding:10px;margin-top:5px;border-radius:6px;border:none;font-size:15px;}
+button{background:#FF9800;color:#000;font-weight:bold;cursor:pointer;}
+table{width:100%;border-collapse:collapse;margin-top:10px;}
+th,td{padding:10px;border-radius:6px;text-align:center;}
+th{background:#333;color:#fff;}
+td{background:#222;}
+span.blink{animation:blink 1s infinite;}
+span.loan{color:#FFD700;} /* زرد طلایی */
+span.rah{color:#FF7C00;}  /* نارنجی */
+span.rent{color:#00FF7F;}  /* سبز */
+@keyframes blink{0%,50%,100%{opacity:1}25%,75%{opacity:0.3}}
+.floating-dots{position:fixed;top:0;left:0;width:100%;height:100%;overflow:hidden;pointer-events:none;z-index:-1;}
+.dot{position:absolute;bottom:-10px;border-radius:50%;opacity:.8;animation:rise linear forwards;}
+@keyframes rise{0%{transform:translateY(0)}100%{transform:translateY(-120vh)}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/jalaali-js/dist/jalaali.js"></script>
+</head>
+<body>
+
+<div class="floating-dots"></div>
+
+<h3 id="shamsiTime"></h3>
+
+<h2>محاسبه قسط وام</h2>
+<input id="loanAmount" placeholder="مبلغ وام (تومان)">
+<input id="loanRate" placeholder="نرخ سالانه %" value="18">
+<input id="loanMonths" placeholder="مدت وام (ماه)">
+<button onclick="calcLoan()">محاسبه قسط</button>
+<div id="loanResult"></div>
+
+<h2>محاسبه رهن و اجاره</h2>
+<input id="rah" placeholder="مبلغ رهن">
+<input id="ejare" placeholder="مبلغ اجاره ماهانه">
+<input id="area" placeholder="متراژ ملک (متر مربع)">
+<input id="coef" placeholder="ضریب تبدیل رهن (مثلاً 33)" value="33">
+<button onclick="calcRent()">محاسبه</button>
+<div id="rentResult"></div>
+
+<script>
+// زمان شمسی
+function updateTime(){
+ let d=new Date(), j=jalaali.toJalaali(d.getFullYear(),d.getMonth()+1,d.getDate());
+ let h=d.getHours(), m=d.getMinutes();
+ document.getElementById('shamsiTime').innerText=`تاریخ شمسی: ${j.jy}/${j.jm}/${j.jd} - ساعت ${h}:${m.toString().padStart(2,'0')}`;
+}
+setInterval(updateTime,1000);
+updateTime();
+
+// فرمت کاما
+function formatNum(input){
+ let val=input.value.replace(/,/g,'').replace(/[^\d.]/g,'');
+ if(val){ let parts=val.split('.'); parts[0]=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,","); input.value=parts.join('.'); } else input.value='';
+}
+document.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',()=>formatNum(inp)));
+
+// محاسبه قسط وام
+function calcLoan(){
+ let P=parseFloat(document.getElementById('loanAmount').value.replace(/,/g,'')),
+     r=parseFloat(document.getElementById('loanRate').value)/100/12,
+     n=parseInt(document.getElementById('loanMonths').value);
+ if(!P||!r||!n){alert('لطفا همه فیلدها را پر کنید'); return;}
+ let p=(P*r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1),
+     total=p*n,
+     s=total-P;
+ document.getElementById('loanResult').innerHTML=
+ `<table>
+ <tr><th colspan="2">نتایج وام</th></tr>
+ <tr><td>قسط ماهانه</td><td><span class="blink loan">${Math.round(p).toLocaleString('fa-IR')} تومان</span></td></tr>
+ <tr><td>مجموع پرداخت</td><td><span class="blink loan">${Math.round(total).toLocaleString('fa-IR')} تومان</span></td></tr>
+ <tr><td>مجموع سود</td><td><span class="blink loan">${Math.round(s).toLocaleString('fa-IR')} تومان</span></td></tr>
+ </table>`;
+}
+
+// محاسبه رهن و اجاره
+function calcRent(){
+ let rah=parseFloat(document.getElementById('rah').value.replace(/,/g,''))||0;
+ let ej=parseFloat(document.getElementById('ejare').value.replace(/,/g,''))||0;
+ let area=parseFloat(document.getElementById('area').value.replace(/,/g,''))||1;
+ let coef=parseFloat(document.getElementById('coef').value.replace(/,/g,''))||33;
+
+ let rahFull=0, ejFull=0;
+ if(rah>0 && ej>0){ rahFull=rah + ej*coef; ejFull=rahFull/coef; }
+ else if(rah>0){ rahFull=rah; ejFull=rah/coef; }
+ else if(ej>0){ rahFull=ej*coef; ejFull=ej; }
+
+ let rahPerM = rahFull/area;
+ let ejPerM = ejFull/area;
+
+ document.getElementById('rentResult').innerHTML=
+ `<table>
+ <tr><th colspan="2">نتایج رهن و اجاره</th></tr>
+ <tr><td>رهن کامل</td><td><span class="blink rah">${Math.round(rahFull).toLocaleString('fa-IR')} تومان</span></td></tr>
+ <tr><td>اجاره کامل</td><td><span class="blink rent">${Math.round(ejFull).toLocaleString('fa-IR')} تومان</span></td></tr>
+ <tr><td>رهن هر متر</td><td>${Math.round(rahPerM).toLocaleString('fa-IR')} تومان</td></tr>
+ <tr><td>اجاره هر متر</td><td>${Math.round(ejPerM).toLocaleString('fa-IR')} تومان</td></tr>
+ </table>`;
+}
+
+// افکت نقطه‌ها
+function dot(){
+ let d=document.createElement("div");
+ d.className="dot";
+ let s=Math.random()*3+2;
+ d.style.left=Math.random()*innerWidth+"px";
+ d.style.width=d.style.height=s+"px";
+ d.style.background=`hsl(${Math.random()*360},100%,70%)`;
+ d.style.animationDuration=(Math.random()*4+4)+"s";
+ document.querySelector(".floating-dots").appendChild(d);
+ setTimeout(()=>d.remove(),5000);
+}
+setInterval(dot,150);
+</script>
+
+</body>
+</html>
