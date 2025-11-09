@@ -121,3 +121,84 @@ setInterval(dot,150);
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<title>محاسبه وام بانک رسالت - حرفه‌ای</title>
+<style>
+    body { font-family: Tahoma, sans-serif; padding: 20px; background-color: #f8f8f8; }
+    h2 { color: #333; }
+    input, select, button { padding: 5px 10px; margin: 5px; }
+    table { border-collapse: collapse; margin-top: 20px; width: 100%; background: #fff; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+    th { background-color: #f0f0f0; }
+    .result { margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<h2>محاسبه وام بانک رسالت</h2>
+
+<label>مبلغ سپرده (میلیون تومان): </label>
+<input type="number" id="deposit" value="100"><br>
+
+<label>مدت سپرده‌گذاری (ماه): </label>
+<select id="monthsDeposit">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
+    <option value="12" selected>12</option>
+</select><br>
+
+<button onclick="calculateLoan()">محاسبه وام‌ها</button>
+
+<div class="result" id="result"></div>
+
+<script>
+const coefficients = {
+    "1": { "10": 0.20, "20": 0.15, "30": 0.10, "40": 0.05 },
+    "2": { "10": 0.40, "20": 0.30, "30": 0.20, "40": 0.15, "50": 0.10 },
+    "3": { "10": 0.60, "20": 0.45, "30": 0.30, "40": 0.20, "50": 0.15, "60": 0.10 },
+    "4": { "10": 0.80, "20": 0.60, "30": 0.40, "40": 0.30, "50": 0.20, "60": 0.15 },
+    "5": { "10": 1.00, "20": 0.75, "30": 0.50, "40": 0.40, "50": 0.30, "60": 0.20 },
+    "6": { "10": 1.20, "20": 0.90, "30": 0.60, "40": 0.45, "50": 0.35, "60": 0.25 },
+    "12": { "10": 2.40, "20": 1.80, "30": 1.20, "40": 0.80, "50": 0.60, "60": 0.45 }
+};
+
+const loanMonths = ["10","20","30","40","50","60"];
+
+function calculateLoan() {
+    const deposit = parseFloat(document.getElementById("deposit").value);
+    const depositMonths = document.getElementById("monthsDeposit").value;
+
+    let html = "<table><tr><th>دوره بازپرداخت (ماه)</th><th>وام قابل دریافت (میلیون تومان)</th></tr>";
+
+    loanMonths.forEach(month => {
+        const coeff = coefficients[depositMonths][month];
+        if(coeff !== undefined) {
+            const loanAmount = deposit * coeff;
+            html += `<tr><td>${month}</td><td>${loanAmount.toLocaleString()}</td></tr>`;
+        } else {
+            html += `<tr><td>${month}</td><td>ناموجود</td></tr>`;
+        }
+    });
+
+    html += "</table>";
+    document.getElementById("result").innerHTML = html;
+}
+</script>
+
+</body>
+</html>
